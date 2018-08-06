@@ -4,4 +4,3 @@ gunicorn
 flask_cors
 flask_httpauth
 pytz
-sqlite3
