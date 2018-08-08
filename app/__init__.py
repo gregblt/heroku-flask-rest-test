@@ -11,8 +11,13 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 auth = HTTPBasicAuth()
 
+
+
 import subprocess
 subprocess.Popen(["python","hitbtc_ETHBTC.py"])
+
+
+
 
 
 users = {
