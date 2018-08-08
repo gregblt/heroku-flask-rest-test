@@ -6,6 +6,11 @@ import pytz
 import sqlite3
 import datetime
 
+import ftplib
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+
+
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -16,13 +21,28 @@ auth = HTTPBasicAuth()
 import subprocess
 subprocess.Popen(["python","hitbtc_ETHBTC.py"])
 
+def job_function():
+    session = ftplib.FTP('tradefinest.com','zk46dbnj','Zaq1mlp0')
+    file = open('./base.db','rb')                  # file to send
+    session.storbinary('STOR /etc/tradefinest.com/base_'+datetime.datetime.now(pytz.timezone('Etc/GMT-8')).strftime("%Y-%m-%d_%H:%M:%S")+".db",
+     file)     # send the file
+    file.close()                                    # close file and FTP
+    session.quit()
 
-
-
+scheduler = BackgroundScheduler()
+scheduler.start()
+scheduler.add_job(
+    func=job_function,
+    trigger=IntervalTrigger(minutes=5),
+    id='printing_job',
+    name='Print date and time every five seconds',
+    replace_existing=True)
 
 users = {
     "admin": "admin"
 }
+
+
 
 def getMarketData():
     yest = (datetime.datetime.now(pytz.timezone('Etc/GMT-8'))- datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -100,9 +120,11 @@ def history():
               where date BETWEEN '%s 00:00:00' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,date))
     
     cycles=[]
+    cycle_id=0
     for row in x:
         #print(row)
-        t={"id":row[0],"profit":round(row[1],2),'buy':{},'sell':{}}
+        t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
+        cycle_id+=1
         
         # GET BUY
         c2 = conn.cursor()
@@ -162,9 +184,10 @@ def realtime_data():
               where date BETWEEN '%s %s' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,lastTime,date))
     
     cycles=[]
+    cycle_id=0
     for row in x:
         #print(row)
-        t={"id":row[0],"profit":round(row[1],2),'buy':{},'sell':{}}
+        t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
         
         # GET BUY
         c2 = conn.cursor()
@@ -176,6 +199,8 @@ def realtime_data():
         cycles.append(t)
         
         c2.close()
+
+        cycle_id+=1
         
     c.close()
     
