@@ -1,1 +1,1 @@
-worker: python hitbtc_ETHBTC.py
+web: gunicorn app:app

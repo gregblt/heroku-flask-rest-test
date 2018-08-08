@@ -11,6 +11,8 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 auth = HTTPBasicAuth()
 
+import subprocess
+subprocess.Popen(["python","hitbtc_ETHBTC.py"])
 
 
 users = {
@@ -61,7 +63,7 @@ def getMarketData():
 # def activate_job():
 #     import subprocess
 #     subprocess.Popen(["python","hitbtc_ETHBTC.py"])
-    
+
 @auth.get_password
 def get_pw(username):
     if username in users:
