@@ -118,9 +118,9 @@ def history():
     x=c.execute('''select rowid, profit from cycle where rowid in 
               (select cycle from transac 
               where date BETWEEN '%s 00:00:00' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,date))
-    
+    results = c.fetchall()
     cycles=[]
-    cycle_id=c.rowcount
+    cycle_id=len(results)
     for row in x:
         #print(row)
         t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
@@ -183,8 +183,9 @@ def realtime_data():
               (select cycle from transac 
               where date BETWEEN '%s %s' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,lastTime,date))
     
+    results = c.fetchall()
     cycles=[]
-    cycle_id=c.rowcount
+    cycle_id=len(results)
     for row in x:
         #print(row)
         t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
