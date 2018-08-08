@@ -1,4 +1,6 @@
 from app import app
 
 if __name__ == '__main__':
-    app.run()
+	import subprocess
+	subprocess.Popen(["python","hitbtc_ETHBTC.py"])
+  app.run()
