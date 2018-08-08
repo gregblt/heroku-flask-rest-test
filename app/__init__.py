@@ -57,10 +57,10 @@ def getMarketData():
             'sum30':round(sum30, 2),
             'avg30':round(avg30, 2)}
 
-@app.before_first_request
-def activate_job():
-    import subprocess
-    subprocess.Popen(["python","hitbtc_ETHBTC.py"])
+# @app.before_first_request
+# def activate_job():
+#     import subprocess
+#     subprocess.Popen(["python","hitbtc_ETHBTC.py"])
     
 @auth.get_password
 def get_pw(username):
