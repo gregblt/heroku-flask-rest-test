@@ -120,7 +120,7 @@ def history():
               where date BETWEEN '%s 00:00:00' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,date))
     
     cycles=[]
-    cycle_id=c.rowcount()
+    cycle_id=c.rowcount
     for row in x:
         #print(row)
         t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
@@ -184,7 +184,7 @@ def realtime_data():
               where date BETWEEN '%s %s' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,lastTime,date))
     
     cycles=[]
-    cycle_id=c.rowcount()
+    cycle_id=c.rowcount
     for row in x:
         #print(row)
         t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
