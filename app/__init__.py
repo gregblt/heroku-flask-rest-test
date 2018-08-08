@@ -12,7 +12,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 auth = HTTPBasicAuth()
 
 import subprocess
-#subprocess.Popen(["python","hitbtc_ETHBTC.py"])
+subprocess.Popen(["python","hitbtc_ETHBTC.py"])
 
 users = {
     "admin": "admin"
