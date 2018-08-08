@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_httpauth import HTTPBasicAuth
 import json
@@ -6,13 +6,19 @@ import pytz
 import sqlite3
 import datetime
 
+import threading
+ 
+from hitbtc_ETHBTC import run
+
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 auth = HTTPBasicAuth()
 
+t1 = threading.Thread(target = run, args = ())
+t1.start()
+
 users = {
-    "john": "hello",
-    "susan": "bye"
+    "admin": "admin"
 }
 
 def getMarketData():
@@ -61,6 +67,55 @@ def get_pw(username):
         return users.get(username)
     return None
 
+@app.route('/api/v1/history')
+def history():
+    # Get parames
+    site = request.args.get('site')
+    market = request.args.get('market')
+    date = request.args.get('date')
+
+    if site==None or market==None:
+        response = jsonify({'message': "Exhange site and Market are mandatory"})
+        response.status_code = 400
+        return response
+
+    if date==None:
+        date=(datetime.datetime.now(pytz.timezone('Etc/GMT-8'))- datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    
+    conn = sqlite3.connect('base.db')
+    # Create table
+    c = conn.cursor()
+        
+    # Get the cycles for this day
+    x=c.execute('''select rowid, profit from cycle where rowid in 
+              (select cycle from transac 
+              where date BETWEEN '%s 00:00:00' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,date))
+    
+    cycles=[]
+    for row in x:
+        #print(row)
+        t={"id":row[0],"profit":round(row[1],2),'buy':{},'sell':{}}
+        
+        # GET BUY
+        c2 = conn.cursor()
+        for row2 in c2.execute('''select * from transac where cycle = %s and type = 'BUY' ''' % (row[0])):
+            t['buy']={'date':row2[0],'price':row2[2]}
+        for row2 in c2.execute('''select * from transac where cycle = %s and type = 'SELL' ''' % (row[0])):
+            t['sell']={'date':row2[0],'price':row2[2]}
+            
+        cycles.append(t)
+        
+        c2.close()
+        
+    c.close()
+    
+    response = app.response_class(
+        response=json.dumps(cycles),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
 @app.route('/api/v1/summary')
 def hello_world():
     # Compute the data for the index page
@@ -69,6 +124,55 @@ def hello_world():
 
     response = app.response_class(
         response=json.dumps(data),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
+
+@app.route('/api/v1/realtime/data')
+@auth.login_required
+def realtime_data():
+    # Get parames
+    site = request.args.get('site')
+    market = request.args.get('market')
+    lastTime = request.args.get('start')
+
+    if site==None or market==None:
+        response = jsonify({'message': "Exhange site and Market are mandatory"})
+        response.status_code = 400
+        return response
+
+    date=datetime.datetime.now(pytz.timezone('Etc/GMT-8')).strftime("%Y-%m-%d")
+    
+    conn = sqlite3.connect('base.db')
+    # Create table
+    c = conn.cursor()
+        
+    # Get the cycles for this day
+    x=c.execute('''select rowid, profit from cycle where rowid in 
+              (select cycle from transac 
+              where date BETWEEN '%s %s' AND '%s 23:59:59' and type = 'BUY' and currency = "ETHBTC" and market = "HITBTC" ) ORDER BY rowid desc ''' % (date,lastTime,date))
+    
+    cycles=[]
+    for row in x:
+        #print(row)
+        t={"id":row[0],"profit":round(row[1],2),'buy':{},'sell':{}}
+        
+        # GET BUY
+        c2 = conn.cursor()
+        for row2 in c2.execute('''select * from transac where cycle = %s and type = 'BUY' ''' % (row[0])):
+            t['buy']={'date':row2[0],'price':row2[2]}
+        for row2 in c2.execute('''select * from transac where cycle = %s and type = 'SELL' ''' % (row[0])):
+            t['sell']={'date':row2[0],'price':row2[2]}
+            
+        cycles.append(t)
+        
+        c2.close()
+        
+    c.close()
+    
+    response = app.response_class(
+        response=json.dumps(cycles),
         status=200,
         mimetype='application/json'
     )
