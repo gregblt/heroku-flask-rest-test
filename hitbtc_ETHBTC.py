@@ -321,3 +321,5 @@ def run():
             print(now.strftime("%Y-%m-%d %H:%M:%S"))
             pass
         time.sleep(7) # 120 equals two minutes, you can ping it every second by putting a 1 in here
+
+run()

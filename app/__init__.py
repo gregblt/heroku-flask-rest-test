@@ -6,16 +6,13 @@ import pytz
 import sqlite3
 import datetime
 
-import threading
- 
-from hitbtc_ETHBTC import run
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 auth = HTTPBasicAuth()
 
-t1 = threading.Thread(target = run, args = ())
-t1.start()
+import subprocess
+subprocess.Popen(["python","hitbtc_ETHBTC.py"])
 
 users = {
     "admin": "admin"
