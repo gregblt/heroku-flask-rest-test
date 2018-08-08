@@ -121,7 +121,7 @@ def history():
     results = c.fetchall()
     cycles=[]
     cycle_id=len(results)
-    for row in x:
+    for row in results:
         #print(row)
         t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
         cycle_id-=1
@@ -186,7 +186,7 @@ def realtime_data():
     results = c.fetchall()
     cycles=[]
     cycle_id=len(results)
-    for row in x:
+    for row in results:
         #print(row)
         t={"id":cycle_id,"profit":round(row[1],2),'buy':{},'sell':{}}
         
