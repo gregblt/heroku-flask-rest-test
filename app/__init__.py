@@ -5,7 +5,7 @@ import json
 import pytz
 import sqlite3
 import datetime
-
+import requests
 import ftplib
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -16,18 +16,31 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 auth = HTTPBasicAuth()
 
+# Get the DB
+session = ftplib.FTP('tradefinest.com','zk46dbnj','Zaq1mlp0')
+file = open('./base.db','wb')                  # file to send
+
+filename='/etc/tradefinest.com/base_2018-08-09_17:55:59.db'
+session.retrbinary('RETR %s' % filename, file.write)
+
+file.close()                                    # close file and FTP
+session.quit()
 
 
 import subprocess
 subprocess.Popen(["python","hitbtc_ETHBTC.py"])
 
+
 def job_function():
     session = ftplib.FTP('tradefinest.com','zk46dbnj','Zaq1mlp0')
     file = open('./base.db','rb')                  # file to send
-    session.storbinary('STOR /etc/tradefinest.com/base_'+datetime.datetime.now(pytz.timezone('Etc/GMT-8')).strftime("%Y-%m-%d_%H:%M:%S")+".db",
-     file)     # send the file
+    # session.storbinary('STOR /etc/tradefinest.com/base_'+datetime.datetime.now(pytz.timezone('Etc/GMT-8')).strftime("%Y-%m-%d_%H:%M:%S")+".db",
+    #  file)     # send the file
+    session.storbinary('STOR /etc/tradefinest.com/base.db',
+     file)     # send the file'
     file.close()                                    # close file and FTP
     session.quit()
+    requests.get("https://sleepy-ridge-38278.herokuapp.com/api/v1/ping")
 
 scheduler = BackgroundScheduler()
 scheduler.start()
@@ -94,6 +107,17 @@ def get_pw(username):
     if username in users:
         return users.get(username)
     return None
+
+@app.route('/api/v1/ping')
+def ping():
+    print("Just got ping")
+
+    response = app.response_class(
+        response=json.dumps({"status":'ok'}),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 @app.route('/api/v1/history')
 def history():
