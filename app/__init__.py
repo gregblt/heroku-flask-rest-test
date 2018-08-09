@@ -20,7 +20,7 @@ auth = HTTPBasicAuth()
 session = ftplib.FTP('tradefinest.com','zk46dbnj','Zaq1mlp0')
 file = open('./base.db','wb')                  # file to send
 
-filename='/etc/tradefinest.com/base_2018-08-09_17:55:59.db'
+filename='/etc/tradefinest.com/base.db'
 session.retrbinary('RETR %s' % filename, file.write)
 
 file.close()                                    # close file and FTP
