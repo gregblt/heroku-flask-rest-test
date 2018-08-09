@@ -87,7 +87,7 @@ def getMarketData():
     if(len(profits30)==0):
         avg30=0
     else:
-        avg30=sum(profits30) / float(len(profits30))  
+        avg30=sum(profits30) / 30.0
         
     sum30=sum(profits30)
     
